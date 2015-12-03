@@ -2,12 +2,12 @@
 
 November 18, 2015
 
-Editors:
+著者:
 
 * [Bjarne Stroustrup](http://www.stroustrup.com)
 * [Herb Sutter](http://herbsutter.com/)
 
-This document is a very early draft. It is inkorrekt, incompleat, and pÂµÃ¸oorly formatted.
+このドキュメントは下書きである。 誤字や脱字を含み, and pÂµÃ¸oorly formatted.
 Had it been an open source (code) project, this would have been release 0.6.
 Copying, use, modification, and creation of derivative works from this project is licensed under an MIT-style license.
 Contributing to this project requires agreeing to a Contributor License. See the accompanying [LICENSE](LICENSE) file for details.
@@ -18,16 +18,16 @@ We plan to modify and extend this document as our understanding improves and the
 When commenting, please note [the introduction](#S-introduction) that outlines our aims and general approach.
 The list of contributors is [here](#SS-ack).
 
-Problems:
+課題:
 
 * The sets of rules have not been thoroughly checked for completeness, consistency, or enforceability.
-* Triple question marks (???) mark known missing information
-* Update reference sections; many pre-C++11 sources are too old.
+* ３つのクエスチョンマーク(???) は情報が失われている事を表す
+* Update reference sections; 多くの準C++11コードは古臭いものとなってしまっている
 * For a more-or-less up-to-date to-do list see: [To-do: Unclassified proto-rules](#S-unclassified)
 
 You can [read an explanation of the scope and structure of this Guide](#S-abstract) or just jump straight in:
 
-* [P: Philosophy](#S-philosophy)
+* [P: 哲学](#S-philosophy)
 * [I: Interfaces](#S-interfaces)
 * [F: Functions](#S-functions)
 * [C: Classes and class hierarchies](#S-class)
@@ -88,12 +88,12 @@ Definitions of terms used to express and discuss the rules, that are not languag
 * resource
 * exception guarantee
 
-# <a name="S-abstract"></a> Abstract
+# <a name="S-abstract"></a> 概要
 
 This document is a set of guidelines for using C++ well.
-The aim of this document is to help people to use modern C++ effectively.
-By "modern C++" we mean C++11 and C++14 (and soon C++17).
-In other words, what would you like your code to look like in 5 years' time, given that you can start now? In 10 years' time?
+このドキュメントはモダンなC++を効果的に使えるように制作された。
+"モダンなC++"とはC++11やC++14(または、来るC++17)の事である。
+言い換えると, what would you like your code to look like in 5 years' time, given that you can start now? In 10 years' time?
 
 The guidelines are focused on relatively higher-level issues, such as interfaces, resource management, memory management, and concurrency.
 Such rules affect application architecture and library design.
@@ -126,12 +126,12 @@ We plan to build tools for that and hope others will too.
 Comments and suggestions for improvements are most welcome.
 We plan to modify and extend this document as our understanding improves and the language and the set of available libraries improve.
 
-# <a name="S-introduction"></a> In: Introduction
+# <a name="S-introduction"></a> In: 前書き
 
 This is a set of core guidelines for modern C++, C++14, and taking likely future enhancements and taking ISO Technical Specifications (TSs) into account.
 The aim is to help C++ programmers to write simpler, more efficient, more maintainable code.
 
-Introduction summary:
+前書きの目次:
 
 * [In.target: Target readership](#SS-readers)
 * [In.aims: Aims](#SS-aims)
@@ -140,9 +140,9 @@ Introduction summary:
 * [In.struct: The structure of this document](#SS-struct)
 * [In.sec: Major sections](#SS-sec)
 
-## <a name="SS-readers"></a> In.target: Target readership
+## <a name="SS-readers"></a> In.target: 対象読者
 
-All C++ programmers. This includes [programmers who might consider C](#S-cpl).
+全てのC++プログラマーが対象である。これは[Cプログラマー](#S-cpl)も含む。
 
 ## <a name="SS-aims"></a> In.aims: Aims
 
@@ -162,8 +162,8 @@ They do not simply define a subset of C++ to be used (for reliability, safety, p
 Instead, they strongly recommend the use of a few simple "extensions" ([library components](#S-gsl))
 that make the use of the most error-prone features of C++ redundant, so that they can be banned (in our set of rules).
 
-The rules emphasize static type safety and resource safety.
-For that reason, they emphasize possibilities for range checking, for avoiding dereferencing `nullptr`, for avoiding dangling pointers, and the systematic use of exceptions (via RAII).
+このルールでは静的安全やリソース安全を重視している。
+なので、they emphasize possibilities for range checking, 参照の無い`nullptr`を避け, ダングリングポインタを避け、そして（RAIIを経由して）例外を使う。
 Partly to achieve that and partly to minimize obscure code as a source of errors, the rules also emphasize simplicity and the hiding of necessary complexity behind well-specified interfaces.
 
 Many of the rules are prescriptive.
@@ -201,7 +201,7 @@ The rules then provide reasons, examples of potential consequences of the violat
 These guidelines are not intended to be a substitute for a tutorial treatment of C++.
 If you need a tutorial for some given level of experience, see [the references](#S-references).
 
-This is not a guide on how to convert old C++ code to more modern code.
+このガイドは古いC++のコードをモダンなコードに変換する事はできない。
 It is meant to articulate ideas for new code in a concrete fashion.
 However, see [the modernization section](#S-modernizing) for some possible approaches to modernizing/rejuvenating/upgrading.
 Importantly, the rules support gradual adoption: It is typically infeasible to convert all of a large code base at once.
@@ -341,7 +341,7 @@ Philosophical rules are generally not mechanically checkable.
 However, individual rules reflecting these philosophical themes are.
 Without a philosophical basis the more concrete/specific/checkable rules lack rationale.
 
-### <a name="Rp-direct"></a> P.1: Express ideas directly in code
+### <a name="Rp-direct"></a> P.1: 直接的な表現を使う
 
 ##### Reason
 
