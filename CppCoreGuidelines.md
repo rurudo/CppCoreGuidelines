@@ -345,7 +345,7 @@ Without a philosophical basis the more concrete/specific/checkable rules lack ra
 
 ##### Reason
 
-Compilers don't read comments (or design documents) and neither do many programmers (consistently).
+コンパイラはコメント(or design documents)を読まないし、多くのプログラマーも読まない(consistently).
 What is expressed in code has defined semantics and can (in principle) be checked by compilers and other tools.
 
 ##### Example
@@ -353,12 +353,12 @@ What is expressed in code has defined semantics and can (in principle) be checke
     class Date {
         // ...
     public:
-        Month month() const;  // do
-        int month();          // don't
+        Month month() const;  // 良い
+        int month();          // 悪い
         // ...
     };
 
-The first declaration of `month` is explicit about returning a `Month` and about not modifying the state of the `Date` object.
+１つ目の`month`は明確に`Month`を返す事が分かり、かつ`Date`オブジェクトの状態を変化させない事が分かる.
 The second version leaves the reader guessing and opens more possibilities for uncaught bugs.
 
 ##### Example
@@ -368,7 +368,7 @@ The second version leaves the reader guessing and opens more possibilities for u
         string val;
         cin >> val;
         // ...
-        int index = 0;            // bad
+        int index = 0;            // 悪い
         for (int i = 0; i < v.size(); ++i)
             if (v[i] == val) {
                 index = i;
@@ -378,7 +378,7 @@ The second version leaves the reader guessing and opens more possibilities for u
     }
 
 That loop is a restricted form of `std::find`.
-A much clearer expression of intent would be:
+意図のより明確な表現は次のようになる:
 
     void do_something(vector<string>& v)
     {
@@ -389,67 +389,68 @@ A much clearer expression of intent would be:
         // ...
     }
 
-A well-designed library expresses intent (what is to be done, rather than just how something is being done) far better than direct use of language features.
+よく設計されたライブラリは(what is to be done, rather than just how something is being done) 言語機能を直接使用するよりもはるかに意図を良く伝えることができる。
 
 A C++ programmer should know the basics of the standard library, and use it where appropriate.
-Any programmer should know the basics of the foundation libraries of the project being worked on, and use them appropriately.
+C++のプログラマは標準ライブラリの基本を知っているし、適切な場合にはそれを使用する必要がある。
+プログラマは作業中のプロジェクトの基礎ライブラリの基本を知って、それらを適切に使用する必要がある。
 Any programmer using these guidelines should know the [guideline support library](#S-gsl), and use it appropriately.
 
 ##### Example
 
-    change_speed(double s);   // bad: what does s signify?
+    change_speed(double s);   // 悪い: sが何を意味するか分かりにくい
     // ...
     change_speed(2.3);
 
-A better approach is to be explicit about the meaning of the double (new speed or delta on old speed?) and the unit used:
+より良いアプローチはdoubleの意味を明確にし (新しいspeedなのか古いspeedとの差分なのか?) そして使用される単位の意味について明確にすると良い:
 
-    change_speed(Speed s);    // better: the meaning of s is specified
+    change_speed(Speed s);    // better: sの意味が分かる
     // ...
-    change_speed(2.3);        // error: no unit
+    change_speed(2.3);        // error: 単位が違う
     change_speed(23m / 10s);  // meters per second
 
-We could have accepted a plain (unit-less) `double` as a delta, but that would have been error-prone.
-If we wanted both absolute speed and deltas, we would have defined a `Delta` type.
+私たちは、デルタとしてプレーン（無単位） `double`を受け入れたはずだったが、それはエラーが発生しやすいされていると思う。
+我々は絶対的なスピードとデルタの両方を望んでいた場合、我々は`Delta`型を定義しているだろう。
 
 ##### Enforcement
 
-Very hard in general.
+一般化することは非常に難しい。
 
-* use `const` consistently (check if member functions modify their object; check if functions modify arguments passed by pointer or reference)
-* flag uses of casts (casts neuter the type system)
-* detect code that mimics the standard library (hard)
+* 一貫して`const`を使用する(メンバ関数は、そのオブジェクトを変更するかどうかを確認し、関数がポインタまたは参照によって渡される引数を変更するかどうかを確認)
+* フラグはキャストして使用する (casts neuter the type system)
+* 標準ライブラリを模倣したコードを検出 (難しい)
 
 ### <a name="Rp-C++"></a> P.2: Write in ISO Standard C++
 
-##### Reason
+##### 理由
 
-This is a set of guidelines for writing ISO Standard C++.
+これは、ISO標準C++を記述するためのガイドラインです。
 
 ##### Note
 
-There are environments where extensions are necessary, e.g., to access system resources.
-In such cases, localize the use of necessary extensions and control their use with non-core Coding Guidelines.  If possible, build interfaces that encapsulate the extensions so they can be turned off or compiled away on systems that do not support those extensions.
+システムリソースにアクセスするなどが拡張が必要な環境がある。
+このような場合には、必要な拡張機能の使用をローカライズし、非中核コーディングのガイドラインとの使用を制御する。 If possible, build interfaces that encapsulate the extensions so they can be turned off or compiled away on systems that do not support those extensions.
 
-Extensions often do not have rigorously defined semantics.  Even extensions that
+拡張機能は、多くの場合、厳密に定義された意味を持っていない。  Even extensions that
 are common and implemented by multiple compilers may have slightly different
 behaviors and edge case behavior as a direct result of *not* having a rigorous
-standard definition.  With sufficient use of any such extension, expected
-portability will be impacted.
+standard definition.
+そのような拡張機能を頻繁に使用すると、ポータビリティに影響がでるだろう。
 
 ##### Note
 
-There are environments where restrictions on use of standard C++ language or library features are necessary, e.g., to avoid dynamic memory allocation as required by aircraft control software standards.
-In such cases, control their (dis)use with non-core Coding Guidelines.
+動的なメモリ割り当てを回避する必要がある航空機の制御ソフトウェアなど、標準のC++言語やライブラリの使用には制限が必要な環境がある。
+このような場合には、non-core Coding Guidelinesを慎重に使うか、使わないようにする。
 
 ##### Enforcement
 
-Use an up-to-date C++ compiler (currently C++11 or C++14) with a set of options that do not accept extensions.
+拡張を受け入れず、一連のオプションを使って最新のC++コンパイラ（現在はC ++11またはC ++14）を使用する。
 
 ### <a name="Rp-what"></a> P.3: Express intent
 
 ##### Reason
 
-Unless the intent of some code is stated (e.g., in names or comments), it is impossible to tell whether the code does what it is supposed to do.
+いくつかのコードは（例えば、名前またはコメントで）記載されていない限り、意図通りの挙動をするかどうかを判断することは不可能である。
 
 ##### Example
 
