@@ -343,7 +343,7 @@ Without a philosophical basis the more concrete/specific/checkable rules lack ra
 
 ### <a name="Rp-direct"></a> P.1: 直接的な表現を使う
 
-##### Reason
+##### 理由
 
 コンパイラはコメント(or design documents)を読まないし、多くのプログラマーも読まない(consistently).
 What is expressed in code has defined semantics and can (in principle) be checked by compilers and other tools.
@@ -391,7 +391,6 @@ That loop is a restricted form of `std::find`.
 
 よく設計されたライブラリは(what is to be done, rather than just how something is being done) 言語機能を直接使用するよりもはるかに意図を良く伝えることができる。
 
-A C++ programmer should know the basics of the standard library, and use it where appropriate.
 C++のプログラマは標準ライブラリの基本を知っているし、適切な場合にはそれを使用する必要がある。
 プログラマは作業中のプロジェクトの基礎ライブラリの基本を知って、それらを適切に使用する必要がある。
 Any programmer using these guidelines should know the [guideline support library](#S-gsl), and use it appropriately.
@@ -409,8 +408,8 @@ Any programmer using these guidelines should know the [guideline support library
     change_speed(2.3);        // error: 単位が違う
     change_speed(23m / 10s);  // meters per second
 
-私たちは、デルタとしてプレーン（無単位） `double`を受け入れたはずだったが、それはエラーが発生しやすいされていると思う。
-我々は絶対的なスピードとデルタの両方を望んでいた場合、我々は`Delta`型を定義しているだろう。
+私たちは、単位の無い `double`を速度差分として受け入れたはずだったが、それはエラーが発生しやすい。
+私達が絶対的なスピードと速度差分の両方を望んでいた場合、私達は`Delta`型を定義するだろう。
 
 ##### Enforcement
 
@@ -420,7 +419,7 @@ Any programmer using these guidelines should know the [guideline support library
 * フラグはキャストして使用する (casts neuter the type system)
 * 標準ライブラリを模倣したコードを検出 (難しい)
 
-### <a name="Rp-C++"></a> P.2: Write in ISO Standard C++
+### <a name="Rp-C++"></a> P.2: ISO Standard C++を用いる
 
 ##### 理由
 
@@ -429,18 +428,16 @@ Any programmer using these guidelines should know the [guideline support library
 ##### Note
 
 システムリソースにアクセスするなどが拡張が必要な環境がある。
-このような場合には、必要な拡張機能の使用をローカライズし、非中核コーディングのガイドラインとの使用を制御する。 If possible, build interfaces that encapsulate the extensions so they can be turned off or compiled away on systems that do not support those extensions.
+このような場合には、必要な拡張機能の使用をローカライズし、non-coreコーディングのガイドラインとの使用を制御する。 If possible, build interfaces that encapsulate the extensions so they can be turned off or compiled away on systems that do not support those extensions.
 
-拡張機能は、多くの場合、厳密に定義された意味を持っていない。  Even extensions that
-are common and implemented by multiple compilers may have slightly different
-behaviors and edge case behavior as a direct result of *not* having a rigorous
+拡張機能は、多くの場合、厳密に定義された意味を持っていない。複数のコンパイラで実装された一般的な拡張でさえある程度は違う挙動をするかもしれないし、and edge case behavior as a direct result of *not* having a rigorous
 standard definition.
 そのような拡張機能を頻繁に使用すると、ポータビリティに影響がでるだろう。
 
 ##### Note
 
 動的なメモリ割り当てを回避する必要がある航空機の制御ソフトウェアなど、標準のC++言語やライブラリの使用には制限が必要な環境がある。
-このような場合には、non-core Coding Guidelinesを慎重に使うか、使わないようにする。
+このような場合には、non-coreコーディングのガイドラインを慎重に使うか、使わないようにする。
 
 ##### Enforcement
 
@@ -448,7 +445,7 @@ standard definition.
 
 ### <a name="Rp-what"></a> P.3: Express intent
 
-##### Reason
+##### 理由
 
 いくつかのコードは（例えば、名前またはコメントで）記載されていない限り、意図通りの挙動をするかどうかを判断することは不可能である。
 
@@ -456,31 +453,31 @@ standard definition.
 
     int i = 0;
     while (i < v.size()) {
-        // ... do something with v[i] ...
+        // ... v[i]を使って何かする ...
     }
 
-The intent of "just" looping over the elements of `v` is not expressed here. The implementation detail of an index is exposed (so that it might be misused), and `i` outlives the scope of the loop, which may or may not be intended. The reader cannot know from just this section of code.
+The intent of "just" looping over the elements of `v` is not expressed here. インデックスの内部詳細が公開されている為悪用される可能性がある。それにループ変数`i`のスコープが広すぎる。which may or may not be intended. The reader cannot know from just this section of code.
 
-Better:
+良い:
 
-    for (const auto& x : v) { /* do something with x */ }
+    for (const auto& x : v) { /* xを使って何かする */ }
 
-Now, there is no explicit mention of the iteration mechanism, and the loop operates on a copy of elements so that accidental modification cannot happen. If modification is desired, say so:
+この記述により、ループする為の仕組みは明示的に示されなくなり、ループ変数は偶然の変更が起こらないように要素のコピーとして動作する。もし変更が必要な場合はこうします:
 
-    for (auto& x : v) { /* do something with x */ }
+    for (auto& x : v) { /* xを使って何かする */ }
 
-Sometimes better still, use a named algorithm:
+名前付きのアルゴリズムを利用する方が良い場合もある:
 
-    for_each(v, [](int x) { /* do something with x */ });
-    for_each(parallel.v, [](int x) { /* do something with x */ });
+    for_each(v, [](int x) { /* xを使って何かする */ });
+    for_each(parallel.v, [](int x) { /* xを使って何かする */ });
 
-The last variant makes it clear that we are not interested in the order in which the elements of `v` are handled.
+この方法では`v`がどの順番で処理されても問題がないことを明示します。
 
-A programmer should be familiar with
+プログラマは以下の物に精通している必要がある
 
 * [The guideline support library](#S-gsl)
 * [The ISO C++ standard library](#S-stdlib)
-* Whatever foundation libraries are used for the current project(s)
+* 現在のプロジェクトにどのような基礎ライブラリが使用されているか。
 
 ##### Note
 
@@ -488,30 +485,30 @@ Alternative formulation: Say what should be done, rather than just how it should
 
 ##### Note
 
-Some language constructs express intent better than others.
+いくつかの言語構造は、他のものより優れた意図を表現する。
 
 ##### Example
 
-If two `int`s are meant to be the coordinates of a 2D point, say so:
+もし2つの`int`が2次元を表していた場合は以下の違いがある:
 
-      drawline(int, int, int, int);  // obscure
-      drawline(Point, Point);        // clearer
+      drawline(int, int, int, int);  // 曖昧
+      drawline(Point, Point);        // 明確
 
 ##### Enforcement
 
-Look for common patterns for which there are better alternatives
+複数の選択肢がある場合は共通のパターンを探してみよう
 
 * simple `for` loops vs. range-`for` loops
 * `f(T*, int)` interfaces vs. `f(span<T>)` interfaces
-* loop variables in too large a scope
+* あまりに大きなスコープでのループ変数
 * naked `new` and `delete`
-* functions with many arguments of built-in types
+* 大量のプリミティブ型を引数に取る関数
 
 There is a huge scope for cleverness and semi-automated program transformation.
 
-### <a name="Rp-typesafe"></a> P.4: Ideally, a program should be statically type safe
+### <a name="Rp-typesafe"></a> P.4: 理想的には、プログラムを静的型安全にする
 
-##### Reason
+##### 理由
 
 Ideally, a program would be completely statically (compile-time) type safe.
 Unfortunately, that is not possible. Problem areas:
