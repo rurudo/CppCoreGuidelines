@@ -510,8 +510,7 @@ There is a huge scope for cleverness and semi-automated program transformation.
 
 ##### 理由
 
-Ideally, a program would be completely statically (compile-time) type safe.
-Unfortunately, that is not possible. Problem areas:
+理想的には、静的に（コンパイル時に）型安全であるべきだ。残念ながら以下の項目についてこれは不可能だ。
 
 * unions
 * casts
@@ -521,14 +520,16 @@ Unfortunately, that is not possible. Problem areas:
 
 ##### Note
 
-These areas are sources of serious problems (e.g., crashes and security violations).
-We try to provide alternative techniques.
+これらは重大な問題を引き起こす。（例えばクラッシュやセキュリティ違反）
+代替技術を利用できないか検討してみよう。
 
 ##### Enforcement
 
+
+
 We can ban, restrain, or detect the individual problem categories separately, as required and feasible for individual programs.
-Always suggest an alternative.
-For example:
+以下に代替案を提示する。
+例:
 
 * unions - use `variant`
 * casts - minimize their use; templates can help
@@ -536,20 +537,20 @@ For example:
 * range errors - use `span`
 * narrowing conversions - minimize their use and use `narrow` or `narrow_cast` where they are necessary
 
-### <a name="Rp-compile-time"></a> P.5: Prefer compile-time checking to run-time checking
+### <a name="Rp-compile-time"></a> P.5: 実行時のチェックよりもコンパイル時のチェックを好もう
 
-##### Reason
+##### 理由
 
-Code clarity and performance. You don't need to write error handlers for errors caught at compile time.
+コードの透過性と性能が良くなる。コンパイル時にエラーを取得できれば実行時にエラーを補足する必要はない。
 
-##### Example
+##### 例
 
     void initializer(Int x)
-    // Int is an alias used for integers
+    // Intはintegersのエイリアス
     {
-        static_assert(sizeof(Int) >= 4);	// do: compile-time check
+        static_assert(sizeof(Int) >= 4);	// 良い: コンパイル時にチェックする
 
-        int bits = 0;         // don't: avoidable code
+        int bits = 0;         // 悪い: このようなコードは避ける
         for (Int i = 1; i; i <<= 1)
             ++bits;
         if (bits < 32)
@@ -558,7 +559,7 @@ Code clarity and performance. You don't need to write error handlers for errors 
         // ...
     }
 
-##### Example don't
+##### 悪い例
 
     void read(int* p, int n);   // read max n integers into *p
 
