@@ -133,7 +133,7 @@ The aim is to help C++ programmers to write simpler, more efficient, more mainta
 
 前書きの目次:
 
-* [In.target: Target readership](#SS-readers)
+* [In.target: 対象読者](#SS-readers)
 * [In.aims: Aims](#SS-aims)
 * [In.not: Non-aims](#SS-non)
 * [In.force: Enforcement](#SS-force)
@@ -1026,29 +1026,29 @@ You cannot have a race condition on immutable data.
 
 (Simple) Report all non-`const` variables declared at namespace scope.
 
-### <a name="Ri-singleton"></a> I.3: Avoid singletons
+### <a name="Ri-singleton"></a> I.3: シングルトンを使うのはやめよう
 
-##### Reason
+##### 理由
 
-Singletons are basically complicated global objects in disguise.
+シングルトンは基本的には複雑に変装したグローバルオブジェクトのため。
 
 ##### Example
 
     class Singleton {
-        // ... lots of stuff to ensure that only one Singleton object is created,
-        // that it is initialized properly, etc.
+        // シングルトンオブジェクトが確実に１つだけ作られて
+        // プロパティの初期化が行われるようにする
     };
 
-There are many variants of the singleton idea.
-That's part of the problem.
+シングルトンという発想には多くの亜種がある。
+それが問題の１つである。
 
 ##### Note
 
-If you don't want a global object to change, declare it `const` or `constexpr`.
+あなたがグローバルオブジェクトを変更したくない場合、`const` または `constexpr`を宣言する。
 
-##### Exception
+##### 例外
 
-You can use the simplest "singleton" (so simple that it is often not considered a singleton) to get initialization on first use, if any:
+最初の使用での初期化を行うための純粋なシングルトン（設計を考えなくて良いような）の場合は使用できる。
 
     X& myX()
     {
@@ -1056,19 +1056,18 @@ You can use the simplest "singleton" (so simple that it is often not considered 
         return my_x;
     }
 
-This is one of the most effective solutions to problems related to initialization order.
-In a multi-threaded environment the initialization of the static object does not introduce a race condition
-(unless you carelessly access a shared object from within its constructor).
+これは初期化順を制御する最も効果的な解決策の1つだ。
+マルチスレッド環境において静的オブジェクトはレースコンディションを引き起こさない。（うっかりそのコンストラクタ内から共有オブジェクトにアクセスしない限り）
 
-If you, as many do, define a singleton as a class for which only one object is created, functions like `myX` are not singletons, and this useful technique is not an exception to the no-singleton rule.
+もし、あなたが他の大勢のようにシングルトンをオブジェクトを1つだけ作成するためのクラスと定義するのなら、`myX`のような関数はシングルトンではない。そして、この便利なテクニックはシングルトンを無くすルールの例外ではない。
 
 ##### Enforcement
 
-Very hard in general.
+一般化することは非常に難しい。
 
-* Look for classes with names that include `singleton`.
-* Look for classes for which only a single object is created (by counting objects or by examining constructors).
-* If a class X has a public static function that contains a function-local static of the class' type X and returns a pointer or reference to it, ban that.
+* `singleton`を含む名前を持つクラスを探す。
+* 作成された単一オブジェクトを探す。（オブジェクトを数えたりコンストラクタを調査する）
+* クラスXの持つpublic static関数が内部に静的なクラスXを持ち、それのポインタや参照を返している場合、それを禁止する。
 
 ### <a name="Ri-typed"></a> I.4: Make interfaces precisely and strongly typed
 
