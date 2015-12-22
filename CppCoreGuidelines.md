@@ -1437,59 +1437,58 @@ We don't consider "performance" a valid reason not to use exceptions.
 * (Not enforceable) This is a philosophical guideline that is infeasible to check directly.
 * Look for `errno`.
 
-### <a name="Ri-raw"></a> I.11: Never transfer ownership by a raw pointer (`T*`)
+### <a name="Ri-raw"></a> I.11: 生のポインタによって所有権の譲渡を行わない (`T*`)
 
 ##### 理由
 
-If there is any doubt whether the caller or the callee owns an object, leaks or premature destruction will occur.
+呼び出したオブジェクトや呼び出し先がオブジェクトを所有していた場合、リークや早々にエラーを引き起こすため。
 
 ##### 例
 
 Consider:
 
-    X* compute(args)    // don't
+    X* compute(args)    // 悪い
     {
         X* res = new X{};
         // ...
         return res;
     }
 
-Who deletes the returned `X`? The problem would be harder to spot if compute returned a reference.
-Consider returning the result by value (use move semantics if the result is large):
+返却された`X`を誰が開放するのか？参照が返された場合、問題を発見するのは更に難しくなるだろう。
+値で結果を返せないか考えてみよう(結果が大きい場合にはムーブセマンティクスを使用する):
 
-    vector<double> compute(args)  // good
+    vector<double> compute(args)  // 良い
     {
         vector<double> res(10000);
         // ...
         return res;
     }
 
-**Alternative**: Pass ownership using a "smart pointer", such as `unique_ptr` (for exclusive ownership) and `shared_ptr` (for shared ownership).
-However that is less elegant and less efficient unless reference semantics are needed.
+**別の選択肢**: `unique_ptr`(排他的所有権)や`shared_ptr`(共有所有権)等の所有権を譲渡するスマートポインタを利用する。
+それは参照セマンティクスが必要とされない限り、少しばかり綺麗で効果的だ。
 
-**Alternative**: Sometimes older code can't be modified because of ABI compatibility requirements or lack of resources.
-In that case, mark owning pointers using `owner`:
+**別の選択肢**: 時々、古いコードはABIの互換性要件やリソース不足のために変更することができない。
+その場合には、`owner`を使い所有しているポインタにマークを付ける:
 
-    owner<X*> compute(args)    // It is now clear that ownership is transferred
+    owner<X*> compute(args)    // 所有権が移動したことが明らか
     {
         owner<X*> res = new X{};
         // ...
         return res;
     }
 
-This tells analysis tools that `res` is an owner.
-That is, its value must be `delete`d or transferred to another owner, as is done here by the `return`.
+これは解析ツールに`res`が所有者だと教える。
+戻り値についても`delete`するか別の所有者に転送する必要があることが伝わる。
 
-`owner` is used similarly in the implementation of resource handles.
+リソースハンドルの実装でも同様に`owner`を使用する。
 
 `owner` is defined in the [guideline support library](#S-gsl).
 
 ##### メモ
 
-Every object passed as a raw pointer (or iterator) is assumed to be owned by the
-caller, so that its lifetime is handled by the caller. Viewed another way:
-ownership transfering APIs are relatively rare compared to pointer-passing APIs,
-so the default is "no ownership transfer."
+生のポインタ（またはイテレータ）として渡されたすべてのオブジェクトは呼び出し側が所有しているものとする。なので、その寿命は呼び出し側によって管理される。
+別の見解:
+所有権を譲渡するAPIはポインタ渡しのAPIと比較するとまれなので、デフォルトでは「何も譲渡しない」とする。
 
 **See also**: [Argument passing](#Rf-conventional) and [value return](#Rf-T-return).
 
