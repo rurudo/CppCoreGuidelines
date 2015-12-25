@@ -2149,25 +2149,25 @@ Destructors, `swap` functions, move operations, and default constructors should 
 * Flag functions that are not `noexcept`, yet cannot throw.
 * Flag throwing `swap`, `move`, destructors, and default constructors.
 
-### <a name="Rf-smart"></a> F.7: For general use, take `T*` arguments rather than smart pointers
+### <a name="Rf-smart"></a> F.7: 引数には`T*`よりもスマートポインタを使おう
 
 ##### 理由
 
-Passing a smart pointer transfers or shares ownership.
-Passing by smart pointer restricts the use of a function to callers that use smart pointers.
-Passing a shared smart pointer (e.g., `std::shared_ptr`) implies a run-time cost.
+スマートポインタは譲渡や共有などのオーナーシップを渡すことができる。
+スマートポインタで渡すことにより、関数側での使用方法を制限できる。
+(`std::shared_ptr`のような)共有スマートポインタを渡すことから実行時のコストが増加することも推測できる。
 
 ##### 例
 
-    void f(int*);             // accepts any int*
-    void g(unique_ptr<int>);  // can only accept ints for which you want to transfer ownership
-    void g(shared_ptr<int>);  // can only accept ints for which you are willing to share ownership
+    void f(int*);             // どんなint*でも受け入れる
+    void g(unique_ptr<int>);  // オーナーシップを譲渡した場合のみ受け入れる
+    void g(shared_ptr<int>);  // オーナーシップを共有した場合のみ受け入れる
 
-    void h(const unique_ptr<int>&);  // doesn’t change ownership, but requires a particular ownership of the caller.
+    void h(const unique_ptr<int>&);  // オーナーシップを変更しないが、呼び出し元の特定のオーナーシップが必要
 
 ##### メモ
 
-We can catch dangling pointers statically, so we don't need to rely on resource management to avoid violations from dangling pointers.
+ダングリングポインタを静的に捕捉することができるので、ダングリングポインタを避けるような資源管理をする必要は無い。
 
 **See also**: Discussion of [smart pointer use](#Rr-summary-smartptrs).
 
