@@ -1494,9 +1494,9 @@ Consider:
 
 ##### Enforcement
 
-* (Simple) Warn on `delete` of a raw pointer that is not an `owner`.
-* (Simple) Warn on failure to either `reset` or explicitly `delete` an `owner` pointer on every code path.
-* (Simple) Warn if the return value of `new` or a function call with return value of pointer type is assigned to a raw pointer.
+* (Simple) `owner`のいない生のポインタの`delete`には警告を出す。
+* (Simple) すべてのコードパス上の`reset`や明示的な`owner`のいるポインタへの`delete`が失敗した場合には警告を出す。
+* (Simple) `new`の戻り値やポインタ型の戻り値を持つ関数呼び出しが生のポインタに割り当てられた場合警告を出す。
 
 ### <a name="Ri-nullptr"></a> I.12: Declare a pointer that must not be null as `not_null`
 
@@ -2214,42 +2214,42 @@ The following tables summarize the advice in the following Guidelines, F.16-21.
 
 
 
-### <a name="Rf-in"></a> Rule F.16: For "in" parameters, pass cheaply copied types by value and others by reference to `const`
+### <a name="Rf-in"></a> Rule F.16: 入力用のパラメータにはコピーコストが安い変数か`const`参照を使う
 
 ##### 理由
 
-Both let the caller know that a function will not modify the argument, and both allow initialization by rvalues.
+どちらも呼び出し元関数は引数を変更しない、そして両方が右辺値によって初期化が可能である。
 
-What is "cheap to copy" depends on the machine architecture, but two or three words (doubles, pointers, references) are usually best passed by value.
-When copying is cheap, nothing beats the simplicity and safety of copying, and for small objects (up to two or three words) it is also faster than passing by reference because it does not require an extra reference to access from the function.
+「コピーコストが安い」ことはマシンのアーキテクチャに依存するが、浮動小数点やポインタや参照などは多くの場合最高のパフォーマンスで渡される。
+コピーコストが安いコピーが利用できるならそれに越したことは無い。その様なオブジェクトは関数から参照を辿る余分なコストを必要としないためより高速に機能する。
 
 ##### 例
 
-    void fct(const string& s);  // OK: pass by const reference; always cheap
+    void fct(const string& s);  // OK: const referenceで渡す。大抵安価に機能する
 
-    void fct2(string s);        // bad: potentially expensive
+    void fct2(string s);        // bad: 潜在的なコピーコストが高い
 
-    void fct(int x);          // OK: Unbeatable
+    void fct(int x);          // OK: 最速
 
-    void fct2(const int& x);  // bad: overhead on access in fct2()
+    void fct2(const int& x);  // bad:  fct2()内部で参照するのにオーバーヘッドが発生する
 
-For advanced uses (only), where you really need to optimize for rvalues passed to "input-only" parameters:
+限定的かつ高度な使い方だが、「入力専用」パラメータが右辺値で渡される場合本当に必要なら以下の方法が使える:
 
-* If the function is going to unconditionally move from the argument, take it by `&&`. See [F.21](#Rf-consume).
+* 関数の引数を無条件でmoveする場合は`&&`を利用する。See [F.21](#Rf-consume).
 * If the function is going to keep a copy of the argument, in addition to passing by `const&` add an overload that passes the parameter by `&&` and in the body `std::move`s it to its destination. Essentially this overloads a "consume"; see [F.21](#Rf-consume).
 * In special cases, such as multiple "input + copy" parameters, consider using perfect forwarding. See [F.19](#Rf-forward).
 
 ##### 例
 
-    int multiply(int, int); // just input ints, pass by value
+    int multiply(int, int); // 入力がintなので値で渡す
 
-    string& concatenate(string&, const string& suffix); // suffix is input-only but not as cheap as an int, pass by const&
+    string& concatenate(string&, const string& suffix); // suffixは入力専用だが、const&で渡すことでintと同じぐらいコストが軽くなる
 
     void sink(unique_ptr<widget>);  // input only, and consumes the widget
 
-Avoid "esoteric techniques" such as:
+下記のような難解なテクニックは避ける:
 
-* Passing arguments as `T&&` "for efficiency". Most rumors about performance advantages from passing by `&&` are false or brittle (but see [F.25](#Rf-pass-ref-move).)
+* 「効率化のために」`T&&`として引数を渡す。`&&`渡しによるパフォーマンス上の利点の多くの噂について、嘘か根拠が薄い。  (but see [F.25](#Rf-pass-ref-move).)
 * Returning `const T&` from assignments and similar operations.
 
 ##### 例
@@ -2317,15 +2317,16 @@ If the writer of `g()` makes an assumption about the size of `buffer` a bad logi
 * (Simple) ((Foundation)) Warn when a non-`const` parameter being passed by reference is `move`d.
 
 
-### <a name="Rf-consume"></a> Rule F.18: For "consume" parameters, pass by `X&&` and `std::move` the parameter
+### <a name="Rf-consume"></a> Rule F.18: "
+「消費する」パラメータには、`X&&`や`std::move`パラメータを渡そう
 
 ##### 理由
 
-It's efficient and eliminates bugs at the call site: `X&&` binds to rvalues, which requires an explicit `std::move` at the call site if passing an lvalue.
+効率的かつ呼び出し側でバグを排除できるため。`X&&`は右辺値を拘束するため、呼び出し側で左辺値を渡す場合明示的な`std::move`を要求する。
 
 ##### Exception
 
-Unique owner types that are move-only and cheap-to-move, such as `unique_ptr`, can also be passed by value which is simpler to write and achieves the same effect. Passing by value  does generate one extra (cheap) move operation, but prefer simplicity and clarity first.
+`unique_ptr`のようなmoveしかできない、かつmoveのコストが安い特殊な所有権タイプは、書くことが簡単で同様の効果を得ることができる値で渡すことができる。値で渡すと1つの余分な（安い）move operationを生成するが、最初のシンプルさと明瞭さを好もう。
 
 ##### Enforcement
 * Flag all `X&&` parameters (where `X` is not a template type parameter name) where the function body uses them without `std::move`.
