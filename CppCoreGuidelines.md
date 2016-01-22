@@ -1048,7 +1048,7 @@ You cannot have a race condition on immutable data.
 
 ##### 例外
 
-最初の使用での初期化を行うための純粋なシングルトン（設計を考えなくて良いような）の場合は使用できる。
+最初の使用での初期���を行うための純粋なシングルトン（設計を考えなくて良いような）の場合は使用できる。
 
     X& myX()
     {
@@ -1486,7 +1486,7 @@ Consider:
 
 ##### メモ
 
-生のポインタ（またはイテレータ）として渡されたすべてのオブジェクトは呼び出し側が所有しているものとする。なので、その寿命は呼び出し側によって管理される。
+生のポ���ンタ（またはイテレータ）として渡されたすべてのオブジェクトは呼び出し側が所有しているものとする。なので、その寿命は呼び出し側によって管理される。
 別の見解:
 所有権を譲渡するAPIはポインタ渡しのAPIと比較するとまれなので、デフォルトでは「何も譲渡しない」とする。
 
@@ -2329,7 +2329,7 @@ If the writer of `g()` makes an assumption about the size of `buffer` a bad logi
 `unique_ptr`のようなmoveしかできない、かつmoveのコストが安い特殊な所有権タイプは、書くことが簡単で同様の効果を得ることができる値で渡すことができる。値で渡すと1つの余分な（安い）move operationを生成するが、最初のシンプルさと明瞭さを好もう。
 
 ##### Enforcement
-* Flag all `X&&` parameters (where `X` is not a template type parameter name) where the function body uses them without `std::move`.
+* 関数本体で`std::move`無しで使われた`X&&`パラメータ(`X`はテンプレート型のパラメータ名ではない) 全てにフラグを立てる。
 * Flag access to moved-from objects.
 * Don't conditionally move from objects
 
@@ -2354,30 +2354,30 @@ In that case, and only that case, make the parameter `TP&&` where `TP` is a temp
 * Flag a function that takes a `TP&&` parameter (where `TP` is a template type parameter name) and does anything with it other than `std::forward`ing it exactly once on every static path.
 
 
-### <a name="Rf-out"></a> Rule F.20: For "out" output values, prefer return values to output parameters
+### <a name="Rf-out"></a> Rule F.20: 出力値の取得には出力パラメータよりも戻り値を好む
 
 ##### 理由
 
-A return value is self-documenting, whereas a `&` could be either in-out or out-only and is liable to be misused.
+戻り値は自身を説明するが、`&`は入出力用でも入力限定でも利用できるため誤用しやすい。
 
-This includes large objects like standard containers that use implicit move operations for performance and to avoid explicit memory management.
+これはパフォーマンスのために明示的なメモリ管理を回避し、暗黙的なmove operationを使う標準コンテナのような大きなオブジェクトも含まれる。
 
-If you have multiple values to return, [use a tuple](#Rf-out-multi) or similar multi-member type.
+複数の値を返したい場合は[タプルを使う](#Rf-out-multi)か複数のメンバを持つ型を使う。
 
 ##### 例
 
-    vector<const int*> find_all(const vector<int>&, int x);  // OK: return pointers to elements with the value x
+    vector<const int*> find_all(const vector<int>&, int x);  // OK: x個の要素へのポインタを返す
 
-    void find_all(const vector<int>&, vector<const int*>& out, int x);  // Bad: place pointers to elements with value x in out
+    void find_all(const vector<int>&, vector<const int*>& out, int x);  // Bad: 出力としてx個の要素へのポインタを配置する
 
 ##### メモ
 
-A struct of many (individually cheap-to-move) elements may be in aggregate expensive to move.
+多くの（単体ではmoveコストが安い）要素の構造体を集めるとmoveコストが高くなる場合がある。
 
 ##### Exceptions
 
-* For non-value types, such as types in an inheritance hierarchy, return the object by `unique_ptr` or `shared_ptr`.
-* If a type is expensive to move (e.g., `array<BigPOD>`), consider allocating it on the free store and return a handle (e.g., `unique_ptr`), or passing it in a non-`const` reference to a target object to fill (to be used as an out-parameter).
+* 継承階層の種類などの非値型の場合、`unique_ptr`や`shared_ptr`によってオブジェクトを返す。
+* moveコストが高い場合 (例えば`array<BigPOD>`)、好きな領域にメモリを割り当てハンドルを返す (例えば`unique_ptr`)、または目的オブジェクトの非`const`参照を渡しそれを埋める(出力パラメータとして使う).
 * In the special case of allowing a caller to reuse an object that carries capacity (e.g., `std::string`, `std::vector`) across multiple calls to the function in an inner loop, treat it as an in/out parameter instead and pass by `&`. This is one use of the more generally named "caller-allocated out" pattern.
 
 ##### 例
@@ -3706,14 +3706,14 @@ Also, that may affect ABIs.
 * A class with a reference data member is suspect.
 * A class with an `owner<T>` reference should define its default operations.
 
-### <a name="Rc-dtor-virtual"></a> C.35: A base class destructor should be either public and virtual, or protected and nonvirtual
+### <a name="Rc-dtor-virtual"></a> C.35: ベースクラスのデストラクタはpublicかつvirtual、またはprotectedかつnonvirtualにすべき
 
 ##### 理由
 
-To prevent undefined behavior.
-If the destructor is public, then calling code can attempt to destroy a derived class object through a base class pointer, and the result is undefined if the base class's destructor is non-virtual.
-If the destructor is protected, then calling code cannot destroy through a base class pointer and the destructor does not need to be virtual; it does need to be protected, not private, so that derived destructors can invoke it.
-In general, the writer of a base class does not know the appropriate action to be done upon destruction.
+未定義動作を予防するために。
+publicなデストラクタがベースクラスポインタから継承先のオブジェクトを解放しようとすると、non-virtualなデストラクタを所持している場合未定義動作となる。
+protectedなデストラクタの場合、ベースクラスポインタから解放することはできない。なのでデストラクタにvirtualは必要ない。privateではなくprotectedなので、継承されたデストラクタを実行することができる。
+一般的に、ベースクラスの作者は開放時に適切な処理が行われることを知らない。
 
 ##### Discussion
 
@@ -3721,7 +3721,7 @@ See [this in the Discussion section](#Sd-dtor).
 
 ##### 悪い例
 
-    struct Base {  // BAD: no virtual destructor
+    struct Base {  // BAD: virtualデストラクタを持たない
         virtual f();
     };
 
@@ -3735,12 +3735,12 @@ See [this in the Discussion section](#Sd-dtor).
     {
         unique_ptr<Base> p = make_unique<D>();
         // ...
-    } // p's destruction calls ~Base(), not ~D(), which leaks D::s and possibly more
+    } // pが解放される際に~D()ではなく、~Base()が呼ばれる。そして、D::sなどのリソースがリークする。
 
 ##### メモ
 
-A virtual function defines an interface to derived classes that can be used without looking at the derived classes.
-If the interface allows destroying, it should be safe to do so.
+仮想関数は派生クラスを見ずに使うことができる派生クラスのインターフェイスを定義する。
+インターフェイスが破壊できるのなら、そうするのが安全だ。
 
 ##### メモ
 
