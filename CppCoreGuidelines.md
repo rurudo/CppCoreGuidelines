@@ -7,29 +7,29 @@ November 18, 2015
 * [Bjarne Stroustrup](http://www.stroustrup.com)
 * [Herb Sutter](http://herbsutter.com/)
 
-このドキュメントは下書きである。 誤字や脱字を含み, and pÂµÃ¸oorly formatted.
-Had it been an open source (code) project, this would have been release 0.6.
-Copying, use, modification, and creation of derivative works from this project is licensed under an MIT-style license.
-Contributing to this project requires agreeing to a Contributor License. See the accompanying [LICENSE](LICENSE) file for details.
-We make this project available to "friendly users" to use, copy, modify, and derive from, hoping for constructive input.
+このドキュメントは下書きです。 誤字や脱字を含み, 貧弱なフォーマットで書かれています。
+このドキュメントはオープンソース（コード）プロジェクトとなっており、0.6をリリースしてきました。
+コピー、使用、修正、およびこのプロジェクトから派生物の作成は、MITスタイルのライセンスの下でライセンスされています。
+このプロジェクトに貢献するにはコントリビュータライセンスに同意する必要があります。詳細については、付属の[LICENSE](LICENSE)ファイルを参照してください。
+我々はこのプロジェクトを「友好的なユーザ」に使用、コピー、変更、派生等の建設的な入力を期待して作成しました。
 
-Comments and suggestions for improvements are most welcome.
-We plan to modify and extend this document as our understanding improves and the language and the set of available libraries improve.
-When commenting, please note [the introduction](#S-introduction) that outlines our aims and general approach.
-The list of contributors is [here](#SS-ack).
+改善のためのコメントや提案は大歓迎です。
+我々は私たちの理解や言語、ライブラリの改善に合わせてこの文書の変更と拡張を予定しています。
+コメントするとき、目的や一般的なアプローチの概要を説明した[紹介](#S-introduction)に注意してください。
+貢献者のリストは[ここ](#SS-ack)です。
 
 課題:
 
-* The sets of rules have not been thoroughly checked for completeness, consistency, or enforceability.
+* これらのルールセットは完全性、整合性、強制力のために徹底的に確認されていません。
 * ３つのクエスチョンマーク(???) は情報が失われている事を表す
-* Update reference sections; 多くの準C++11コードは古臭いものとなってしまっている
-* For a more-or-less up-to-date to-do list see: [To-do: Unclassified proto-rules](#S-unclassified)
+* 参照セクションを更新します。 多くの準C++11コードは古いものとなってしまっている
+* 多かれ少なかれ最新のto-doリストの参照してください: [To-do: 未分類仮ルール](#S-unclassified)
 
-You can [read an explanation of the scope and structure of this Guide](#S-abstract) or just jump straight in:
+あなたは[このガイドの範囲の説明と構造を読む](#S-abstract)または直接ジャンプすることができます:
 
 * [P: 哲学](#S-philosophy)
-* [I: Interfaces](#S-interfaces)
-* [F: Functions](#S-functions)
+* [I: インターフェイス](#S-interfaces)
+* [F: 巻数](#S-functions)
 * [C: Classes and class hierarchies](#S-class)
 * [Enum: Enumerations](#S-enum)
 * [R: Resource management](#S-resource)
@@ -3715,9 +3715,9 @@ publicなデストラクタがベースクラスポインタから継承先の�
 protectedなデストラクタの場合、ベースクラスポインタから解放することはできない。なのでデストラクタにvirtualは必要ない。privateではなくprotectedなので、継承されたデストラクタを実行することができる。
 一般的に、ベースクラスの作者は開放時に適切な処理が行われることを知らない。
 
-##### Discussion
+##### 議論
 
-See [this in the Discussion section](#Sd-dtor).
+[この議論](#Sd-dtor)を見てください。
 
 ##### 悪い例
 
@@ -3726,8 +3726,8 @@ See [this in the Discussion section](#Sd-dtor).
     };
 
     struct D : Base {
-        string s {"a resource needing cleanup"};
-        ~D() { /* ... do some cleanup ... */ }
+        string s {"解放処理が必要なリソース"};
+        ~D() { /* ... 解放処理 ... */ }
         // ...
     };
 
@@ -3744,7 +3744,7 @@ See [this in the Discussion section](#Sd-dtor).
 
 ##### メモ
 
-A destructor must be nonprivate or it will prevent using the type :
+デストラクタは非プライベートにすべきです。または型を利用して防ぐことができます:
 
     class X {
         ~X();	// private destructor
@@ -3757,14 +3757,15 @@ A destructor must be nonprivate or it will prevent using the type :
         auto p = make_unique<X>();  // error: cannot destroy
     }
 
-##### Exception
+##### 例外
 
-We can imagine one case where you could want a protected virtual destructor: When an object of a derived type (and only of such a type) should be allowed to destroy *another* object (not itself) through a pointer to base. We haven't seen such a case in practice, though.
+我々はあなたがprotected virtual destructorを望む1つのケースを想像できます。
+オブジェクトが（その型専用の）派生型だった時ベースポインタを介して*他*のオブジェクト（それ自身ではなく）を破壊することを許すべき場合です。
+しかし、我々は実際にはそのようなケースを見ていません。
 
 ##### Enforcement
 
-* A class with any virtual functions should have a destructor that is either public and virtual or else protected and nonvirtual.
-
+* 任意の仮想関数を持つクラスは、publicかつvirtualまたはprotectedかつ非virtualのいずれかであるデストラクタを持つべきです。
 
 ### <a name="Rc-dtor-fail"></a> C.36: A destructor may not fail
 
@@ -13510,11 +13511,11 @@ In summary, no post-construction technique is perfect. The worst techniques dodg
 
 ### <a name="Sd-dtor"></a> Discussion: Make base class destructors public and virtual, or protected and nonvirtual
 
-Should destruction behave virtually? That is, should destruction through a pointer to a `base` class be allowed? If yes, then `base`'s destructor must be public in order to be callable, and virtual otherwise calling it results in undefined behavior. Otherwise, it should be protected so that only derived classes can invoke it in their own destructors, and nonvirtual since it doesn't need to behave virtually virtual.
+デストラクタは仮想的に振る舞うべきでしょうか?つまり、「ベース」クラスへのポインタを介しての破壊は許されるべきでしょうか？yesの場合、「ベース」のデストラクタは呼び出し可能にする為にpublicにすべきです。そして、virtual以外は未定義動作を引き起こします。noの場合、唯一の派生クラスが自分のデストラクタでそれを呼び出すことができるようにprotectedにされ、それが事実上の仮想動作する必要がないため非仮想にされるべきです。
 
 ##### 例
 
-The common case for a base class is that it's intended to have publicly derived classes, and so calling code is just about sure to use something like a `shared_ptr<base>`:
+一般的なケースではベースクラスはpublic派生クラスを持つことを意図しています。そのため、呼び出し元のコードは`shared_ptr<base>`のように使用してください。:
 
     class base {
     public:
@@ -13528,9 +13529,9 @@ The common case for a base class is that it's intended to have publicly derived 
     {
         shared_ptr<base> pb = make_shared<derived>();
         // ...
-    } // ~pb invokes correct destructor only when ~base is virtual
+    } // ~pb ~baseがvirtualの時だけ正しいデストラクタを呼び出します
 
-In rarer cases, such as policy classes, the class is used as a base class for convenience, not for polymorphic behavior. It is recommended to make those destructors protected and nonvirtual:
+レアケースですが、ポリシークラスはprotectedかつ非virtualなデストラクタを作ることをお勧めします。そのクラスは多態性のためではなく利便性のための基本クラスとして使用されます。:
 
     class my_policy {
     public:
@@ -13541,12 +13542,13 @@ In rarer cases, such as policy classes, the class is used as a base class for co
     };
 
     template<class Policy>
-    class customizable : Policy { /* ... */ }; // note: private inheritance
+    class customizable : Policy { /* ... */ }; // note: private継承
 
 ##### メモ
 
-This simple guideline illustrates a subtle issue and reflects modern uses of inheritance and object-oriented design principles.
+この単純なガイドラインは微妙な問題を示し、継承とオブジェクト指向設計の原則の近代的な用途を反映しています。
 
+基底クラス`Base`については、派生オブジェクトが`Base`ポインタを介して破壊する場合と`shared_ptr<Base>`のようなコードを使用する場合があります。
 For a base class `Base`, calling code might try to destroy derived objects through pointers to `Base`, such as when using a `shared_ptr<Base>`. If `Base`'s destructor is public and nonvirtual (the default), it can be accidentally called on a pointer that actually points to a derived object, in which case the behavior of the attempted deletion is undefined. This state of affairs has led older coding standards to impose a blanket requirement that all base class destructors must be virtual. This is overkill (even if it is the common case); instead, the rule should be to make base class destructors virtual if and only if they are public.
 
 To write a base class is to define an abstraction (see Items 35 through 37). Recall that for each member function participating in that abstraction, you need to decide:
